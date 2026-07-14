@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>历史预警记录</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-4">
+    <h2 class="text-center text-danger mb-4">景区客流超限预警记录</h2>
+    <div class="mb-3">
+        <a href="{% url 'index' %}" class="btn btn-primary">← 返回监控首页</a>
+    </div>
+    <table class="table table-striped table-hover">
+        <thead class="table-warning">
+            <tr>
+                <th>预警时间</th>
+                <th>超限人数</th>
+                <th>预警阈值</th>
+                <th>预警详情</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for warn in warn_all %}
+            <tr>
+                <td>{{ warn.warn_time }}</td>
+                <td class="text-danger fw-bold">{{ warn.warn_people }}</td>
+                <td>{{ warn.warn_threshold }}</td>
+                <td>{{ warn.warn_content }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">暂无预警记录</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

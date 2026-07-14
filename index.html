@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>景区客流监控系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0b1426;
+            color: #e0e8f0;
+            font-family: 'Segoe UI', 'PingFang SC', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(0,180,255,0.2);
+            border-radius: 12px 12px 0 0;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #00b4ff, #7b2fff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .live-badge {
+            background: #00b4ff22;
+            border: 1px solid #00b4ff66;
+            border-radius: 20px;
+            padding: 6px 18px;
+            font-size: 14px;
+            color: #7fcfff;
+        }
+        /* 第一行：视频 + 看板 */
+        .row-top {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(0,150,255,0.12);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+        .card-title {
+            font-size: 14px;
+            color: #8aa4c8;
+            margin-bottom: 10px;
+        }
+        .video-wrapper {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .stat-item .stat-label {
+            font-size: 12px;
+            color: #4a6a8a;
+        }
+        .stat-item .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .stat-value.blue { color: #4fc3ff; }
+        .stat-value.orange { color: #ffb74d; }
+        .stat-value.green { color: #66d9a0; }
+        .stat-value.pink { color: #f48fb1; }
+        .stat-value.white { color: #b0c4de; }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            border-top: 1px solid #1a2a3a;
+            padding-top: 12px;
+        }
+        .btn {
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: 1px solid #4fc3ff;
+            background: transparent;
+            color: #4fc3ff;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn:hover { background: #4fc3ff22; }
+        .btn.warn { border-color: #f48fb1; color: #f48fb1; }
+        .btn.reset { border-color: #ffb74d; color: #ffb74d; }
+        /* 图表行 */
+        .row-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+        .chart-box {
+            width: 100%;
+            height: 250px;
+        }
+        .chart-box-sm {
+            height: 200px;
+        }
+        .footer {
+            text-align: center;
+            color: #4a6a8a;
+            font-size: 13px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 16px;
+            margin-top: 4px;
+        }
+        /* 天气内容 */
+        .weather-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 6px 0;
+        }
+        .weather-icon { font-size: 44px; }
+        .weather-temp { font-size: 28px; font-weight: 700; }
+        .weather-desc { color: #8aa4c8; }
+        .weather-meta { margin-left: auto; text-align: right; color: #8aa4c8; font-size: 14px; }
+        .weather-source { font-size: 12px; color: #4a6a8a; margin-top: 6px; }
+    </style>
+</head>
+<body>
+
+<!-- 顶部标题 -->
+<div class="header">
+    <h1>🚀 景区实时客流监控平台</h1>
+    <span class="live-badge">🔴 LIVE · 实时监控</span>
+</div>
+
+<!-- 第一行：视频 + 看板 -->
+<div class="row-top">
+    <!-- 左：视频 -->
+    <div class="card">
+        <div class="card-title">📹 实时景点监控画面</div>
+        <div class="video-wrapper">
+            <img src="{% url 'video' %}" alt="视频流加载中...">
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color:#4a6a8a;">
+            <span>🟢 视频流状态：<span style="color:#66d9a0;">运行中</span></span>
+            <span>YOLO11 行人检测 · 越线自动计数</span>
+        </div>
+    </div>
+
+    <!-- 右：看板 + 操作 -->
+    <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+            <div class="card-title">📊 实时客流统计看板</div>
+            <div class="stats-grid">
+                <div class="stat-item"><div class="stat-label">累计进场</div><div class="stat-value blue" id="inCount">0</div></div>
+                <div class="stat-item"><div class="stat-label">累计离场</div><div class="stat-value orange" id="outCount">0</div></div>
+                <div class="stat-item"><div class="stat-label">当前在园</div><div class="stat-value green" id="currentCount">0</div></div>
+                <div class="stat-item"><div class="stat-label">预警阈值</div><div class="stat-value pink" id="thresholdDisplay">15</div></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05); border-radius:8px; padding:10px; text-align:center; margin-top:6px;">
+                <span style="font-size:13px; color:#8aa4c8;">在园 / 阈值占比</span>
+                <span style="font-size:20px; font-weight:700; color:#b0c4de; display:block;" id="ratioDisplay">0%</span>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="btn" onclick="location.href='/face/'">📸 抓拍记录</button>
+            <button class="btn warn" onclick="location.href='/warn/'">🔔 历史预警</button>
+            <button class="btn reset" onclick="if(confirm('确认重置？')){fetch('/reset/',{method:'POST'}).then(()=>location.reload());}">🔄 重置数据</button>
+        </div>
+    </div>
+</div>
+
+<!-- 第二行：两个图表 -->
+<div class="row-charts">
+    <div class="card">
+        <div class="card-title">📈 今日客流趋势</div>
+        <div class="chart-box" id="trendChart"></div>
+    </div>
+    <div class="card">
+        <div class="card-title">📊 实时在园人数（最近30分钟）</div>
+        <div class="chart-box" id="realtimeChart"></div>
+    </div>
+</div>
+
+<!-- 第三行：客流占比 + 天气 -->
+<div class="row-charts">
+    <div class="card">
+        <div class="card-title">🧩 今日客流占比</div>
+        <div class="chart-box chart-box-sm" id="ratioChart"></div>
+    </div>
+    <div class="card">
+        <div class="card-title">🌤️ 实时天气信息</div>
+        <div class="weather-content">
+            <div class="weather-icon" id="weatherIcon">☀️</div>
+            <div>
+                <div class="weather-temp" id="weatherTemp">--°C</div>
+                <div class="weather-desc" id="weatherDesc">加载中...</div>
+            </div>
+            <div class="weather-meta">
+                <div>湿度: <span id="weatherHumidity">--%</span></div>
+                <div>风速: <span id="weatherWind">-- km/h</span></div>
+            </div>
+        </div>
+        <div class="weather-source">数据来源: 和风天气 · 每30分钟更新</div>
+    </div>
+</div>
+
+<!-- 底部 -->
+<div class="footer">四川峨眉山金顶平台 · 绿色竖线为虚拟计数线，行人脚底越过该线时自动统计</div>
+
+<script>
+    // ===== ECharts 初始化 =====
+    const trendChart = echarts.init(document.getElementById('trendChart'));
+    const realtimeChart = echarts.init(document.getElementById('realtimeChart'));
+    const ratioChart = echarts.init(document.getElementById('ratioChart'));
+
+    const textColor = '#8aa4c8';
+    const baseOption = {
+        tooltip: { trigger: 'axis' },
+        grid: { left: '6%', right: '6%', top: '12%', bottom: '12%' },
+        xAxis: { axisLine: { lineStyle: { color: '#2a3a5a' } }, axisLabel: { color: textColor } },
+        yAxis: { splitLine: { lineStyle: { color: '#1a2a3a' } }, axisLabel: { color: textColor } }
+    };
+
+    trendChart.setOption({
+        ...baseOption,
+        xAxis: { ...baseOption.xAxis, data: ['8:00','9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'] },
+        series: [{ name: '进场人数', type: 'line', smooth: true, data: [12,23,45,56,78,89,102,95,67], lineStyle: { color: '#4fc3ff', width: 3 }, areaStyle: { color: 'rgba(79,195,255,0.15)' } }]
+    });
+
+    realtimeChart.setOption({
+        ...baseOption,
+        xAxis: { ...baseOption.xAxis, data: ['14:00','14:05','14:10','14:15','14:20','14:25','14:30'] },
+        series: [{ name: '在园人数', type: 'line', smooth: true, data: [45,52,48,55,60,58,62], lineStyle: { color: '#66d9a0', width: 3 }, areaStyle: { color: 'rgba(102,217,160,0.15)' } }]
+    });
+
+    ratioChart.setOption({
+        tooltip: { trigger: 'item' },
+        series: [{
+            type: 'pie',
+            radius: ['42%', '70%'],
+            itemStyle: { borderRadius: 8, borderColor: '#0b1426', borderWidth: 2 },
+            label: { color: textColor, formatter: '{b}\n{c} 人' },
+            data: [
+                { value: 567, name: '进场', itemStyle: { color: '#4fc3ff' } },
+                { value: 432, name: '离场', itemStyle: { color: '#ffb74d' } },
+                { value: 135, name: '在园', itemStyle: { color: '#66d9a0' } }
+            ]
+        }]
+    });
+
+    // ===== 数据刷新 =====
+   function fetchAllData() {
+    fetch('/get_count/')
+        .then(res => res.json())
+        .then(data => {
+            // 更新看板
+            document.getElementById('inCount').textContent = data.in_count || 0;
+            document.getElementById('outCount').textContent = data.out_count || 0;
+            document.getElementById('currentCount').textContent = data.current || 0;
+            document.getElementById('thresholdDisplay').textContent = data.threshold || 15;
+            const ratio = data.threshold ? Math.round((data.current / data.threshold) * 100) : 0;
+            document.getElementById('ratioDisplay').textContent = ratio + '%';
+            
+            // 更新图表
+            trendChart.setOption({
+                series: [{ data: data.trend_data || [0,0,0,0,0,0,0,0,0] }]
+            });
+            realtimeChart.setOption({
+                series: [{ data: data.realtime_data || [0,0,0,0,0,0,0] }]
+            });
+            ratioChart.setOption({
+                series: [{
+                    data: data.ratio_data || [
+                        { value: 1, name: '进场' },
+                        { value: 1, name: '离场' },
+                        { value: 1, name: '在园' }
+                    ]
+                }]
+            });
+        })
+        .catch(() => console.log('数据加载失败'));
+}
+//获取天气信息
+fetch('/get_weather/')
+        .then(res => res.json())
+        .then(data => {
+            if (data.temp) {
+                document.getElementById('weatherTemp').textContent = data.temp + '°C';
+                document.getElementById('weatherDesc').textContent = data.text || '未知';
+                document.getElementById('weatherHumidity').textContent = data.humidity ? data.humidity + '%' : '--%';
+                document.getElementById('weatherWind').textContent = data.windSpeed ? data.windSpeed + ' km/h' : '-- km/h';
+            }
+        })
+        .catch(() => console.log('天气加载失败'));
+
+    // 页面加载时调用，之后每5秒刷新
+fetchAllData();
+setInterval(fetchAllData, 5000);
+
+    window.addEventListener('resize', () => {
+        trendChart.resize();
+        realtimeChart.resize();
+        ratioChart.resize();
+    });
+</script>
+</body>
+</html>

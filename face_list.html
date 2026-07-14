@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>人脸抓拍记录</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .face-card { margin-bottom: 20px; }
+        .face-img { width: 100%; height: 180px; object-fit: cover; }
+    </style>
+</head>
+<body class="container mt-4">
+    <h2 class="text-center text-success mb-4">景区人脸抓拍记录列表</h2>
+    <div class="mb-3">
+        <a href="{% url 'index' %}" class="btn btn-primary">← 返回监控首页</a>
+    </div>
+    <div class="row">
+        {% for face in face_all %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card face-card">
+                <img src="{{ face.face_img.url }}" class="card-img-top face-img" alt="抓拍人脸">
+                <div class="card-body">
+                    <p class="card-text"><small>抓拍点位：{{ face.scenic_point }}</small></p>
+                    <p class="card-text"><small>抓拍时间：<br>{{ face.capture_time }}</small></p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning text-center">暂无人脸抓拍记录</div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
