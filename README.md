@@ -39,17 +39,17 @@
 
 ## 项目结构
 
-TourFlowSystem/
-├── flowapp/ # 主应用
-│ ├── migrations/ # 数据库迁移
-│ ├── templates/ # HTML 模板
-│ │ └── index.html # 主看板页面
-│ ├── models.py # 数据库模型（抓拍记录、客流记录、预警记录）
-│ ├── views.py # 视图逻辑（视频流、计数、预警、天气）
-│ ├── urls.py # 路由配置
-│ └── admin.py # 后台管理配置
-├── yolov11_model/ # YOLO11 模型文件
-│ └── yolo11n.pt # 行人检测模型
+TourFlowSystem
+├── flowapp # 主应用
+├── migrations # 数据库迁移
+├── templates # HTML 模板
+├── index.html # 主看板页面
+├── models.py # 数据库模型（抓拍记录、客流记录、预警记录）
+├── views.py # 视图逻辑（视频流、计数、预警、天气）
+├── urls.py # 路由配置
+├── admin.py # 后台管理配置
+├── yolov11_model # YOLO11 模型文件
+├── yolo11n.pt # 行人检测模型
 ├── manage.py # Django 入口
 ├── requirements.txt # 项目依赖
 └── README.md # 项目说明
@@ -58,7 +58,6 @@ TourFlowSystem/
 
 ## 运行方式
 
-```bash
 # 1. 克隆项目
 git clone https://github.com/ZhouHailing/TourFlowSystem.git
 cd TourFlowSystem
@@ -71,6 +70,7 @@ python manage.py runserver
 
 访问 http://127.0.0.1:8000 即可看到主界面。
 
+---
 
 ## 参数调优说明
 
@@ -84,6 +84,7 @@ python manage.py runserver
 | `SPLIT_LINE_RATIO` | 0.58 | 计数线位置（画面比例） |
 | `WARN_LIMIT` | 15 | 预警触发阈值 |
 
+---
 
 ## 主要难点与解决方案
 
@@ -99,6 +100,7 @@ python manage.py runserver
 
 演示阶段采用本地视频文件作为输入源，图表时间轴与视频实际播放时间存在偏差。在真实摄像头场景下，图表会按实际时间戳实时更新，时间轴与监控画面保持一致。系统设计时已预留时间戳接口，支持后续对接真实监控设备。
 
+---
 
 ## 项目截图
 
@@ -107,6 +109,8 @@ python manage.py runserver
 ![主看板](screenshots.png)
 
 说明：主看板包含实时监控画面、客流统计面板、ECharts 图表和实时天气信息。
+
+---
 
 ## 许可证
 
