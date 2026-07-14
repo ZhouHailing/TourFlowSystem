@@ -39,20 +39,25 @@
 
 ## 项目结构
 
-TourFlowSystem
-├── flowapp # 主应用
-├── migrations # 数据库迁移
-├── templates # HTML 模板
-├── index.html # 主看板页面
-├── models.py # 数据库模型（抓拍记录、客流记录、预警记录）
-├── views.py # 视图逻辑（视频流、计数、预警、天气）
-├── urls.py # 路由配置
-├── admin.py # 后台管理配置
-├── yolov11_model # YOLO11 模型文件
-├── yolo11n.pt # 行人检测模型
-├── manage.py # Django 入口
-├── requirements.txt # 项目依赖
-└── README.md # 项目说明
+```
+TourFlowSystem/
+├── flowapp/                      #主应用
+│   ├── migrations/               # 数据库迁移
+│   ├── templates/                # HTML 模板
+│   │   ├── index.html            # 主看板页面
+│   │   ├── face_list.html        # 抓拍记录页面
+│   │   └── warn_list.html        # 预警记录页面
+│   ├── models.py                 # 数据库模型
+│   ├── views.py                  # 视图逻辑
+│   ├── urls.py                   # 路由配置
+│   └── admin.py                  # 后台管理配置
+├── yolov11_model/                # YOLO11 模型文件
+│   ├── yolo11n.pt                # 行人检测模型
+│   └── yolo11n-face.pt           # 人脸检测模型
+├── manage.py                     # Django 入口
+├── requirements.txt              # 项目依赖
+└── README.md                     # 项目说明
+```
 
 ---
 
